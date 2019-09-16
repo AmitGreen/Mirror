@@ -1,0 +1,12 @@
+#
+#   Copyright (c) 2017-2019 Amit Green.  All rights reserved.
+#
+hs_err_pid*.log
+*.new
+*.old
+.*.sw[op]
+target/
+*.tmp
+tmp/
+[xyz]
+[xyz][1-9]

@@ -1,0 +1,94 @@
+set -e$-
+
+echo "===  1. cleanup  ==="
+echo
+
+(
+    set -x$-
+    rm -rf recording.txt replaying.txt target
+    mkdir target target/classes
+)
+
+echo
+echo "... RESTORING source/demo/Chemistry.java"
+
+(
+    set -x$-
+    cp source/demo/Chemistry.original source/demo/Chemistry.java
+)
+
+echo
+echo "===  2.  Compile & run unmodified code  ==="
+echo
+
+(
+    set -x$-
+
+    javac -source 1.8 -d target/classes -cp source source/demo/Chemistry.java
+    java -ea -cp target/classes demo.Chemistry
+)
+
+echo
+echo "===  3.  MODIFY code  ==="
+echo
+
+echo "... MODIFYING source/demo/Chemistry.java (NOTICE ONLY 2 LINES DIFFERENT)"
+
+(
+    set -x$-
+
+    if diff source/demo/Chemistry.mirror source/demo/Chemistry.java; then
+        :
+    fi
+
+    cp source/demo/Chemistry.mirror source/demo/Chemistry.java
+)
+
+echo
+echo "===  4.  Compile & run unmodified code [RECORDING MODE]  ==="
+echo
+
+echo "... Same output as before, with > prefixing recorded lines"
+
+(
+    set -x$-
+
+    javac -source 1.8 -d target/classes -cp source source/demo/Chemistry.java
+    java -ea -cp target/classes demo.Chemistry
+)
+
+echo
+echo "===  5.  Replay mode ==="
+echo
+
+echo "... < prefixing replaying lines (traces in demo.Atom & demo.Molecule are MISSING on purpose -- methods not called)"
+
+(
+    set -x$-
+
+    cp recording.txt replaying.txt
+    java -ea -cp target/classes demo.Chemistry
+)
+
+echo
+echo "=== 6.  RESTORE code ==="
+echo
+
+echo "... RESTORING source/demo/Chemistry.java"
+
+(
+    set -x$-
+
+    cp source/demo/Chemistry.mirror source/demo/Chemistry.java
+)
+
+echo
+echo "=== 7.  Running Maven -- then internal unit tests ==="
+echo
+
+(
+    set -x$-
+
+    mvn package
+    java -cp  target/Alpha-1.0-SNAPSHOT.jar link.crystal.Alpha.Main
+)

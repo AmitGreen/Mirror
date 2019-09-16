@@ -1,0 +1,12 @@
+Atom.construct atom#1 "hydrogen" 1 0 1
+Atom.construct atom#2 "oxygen" 8 8 8
+Atom.representation atom#1 => "<Atom hydrogen; protons 1, neutrons 0, electrons 1>"
+Atom.representation atom#2 => "<Atom oxygen; protons 8, neutrons 8, electrons 8>"
+Molecule.construct molecule#1 "dioxygen" atom#2 atom#2 null
+Molecule.construct molecule#2 "water" atom#2 atom#1 atom#1
+Molecule.representation molecule#1 => "<Molecule dioxygen: oxygen + oxygen"
+Molecule.representation molecule#2 => "<Molecule water: oxygen + hydrogen + hydrogen"
+Molecule.name molecule#1 => "dioxygen"
+Molecule.electrons molecule#1 => 16
+Molecule.name molecule#2 => "water"
+Molecule.electrons molecule#2 => 10
