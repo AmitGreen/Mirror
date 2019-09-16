@@ -1,0 +1,171 @@
+===  1. cleanup  ===
+
++ rm -rf recording.txt replaying.txt target
++ mkdir target target/classes
+
+... RESTORING source/demo/Chemistry.java
++ cp source/demo/Chemistry.original source/demo/Chemistry.java
+
+===  2.  Compile & run unmodified code  ===
+
++ javac -source 1.8 -d target/classes -cp source source/demo/Chemistry.java
++ java -ea -cp target/classes demo.Chemistry
+Chemistry.main@23: created: <Atom hydrogen; protons 1, neutrons 0, electrons 1>
+Chemistry.main@24: created: <Atom oxygen; protons 8, neutrons 8, electrons 8>
+Chemistry.main@29: created: <Molecule dioxygen: oxygen + oxygen>
+Chemistry.main@30: created: <Molecule water: oxygen + hydrogen + hydrogen>
+Molecule.electrons@48: Calculating number of electrons for <Molecule dioxygen: oxygen + oxygen>
+Molecule.electrons@49:   oxygen has 8 electrons
+Molecule.electrons@50:   oxygen has 8 electrons
+Molecule.electrons@61: Calculated total electrons: 16
+Chemistry.main@32: dioxygen has 16 electrons
+Molecule.electrons@48: Calculating number of electrons for <Molecule water: oxygen + hydrogen + hydrogen>
+Molecule.electrons@49:   oxygen has 8 electrons
+Molecule.electrons@50:   hydrogen has 1 electrons
+Molecule.electrons@58:   hydrogen has 1 electrons
+Molecule.electrons@61: Calculated total electrons: 10
+Chemistry.main@33: water has 10 electrons
+
+===  3.  MODIFY code  ===
+
+... MODIFYING source/demo/Chemistry.java (NOTICE ONLY 2 LINES DIFFERENT)
++ diff source/demo/Chemistry.mirror source/demo/Chemistry.java
+7,8c7,8
+< import mirror.Atom;
+< import mirror.Molecule;
+---
+> import demo.Atom;
+> import demo.Molecule;
++ cp source/demo/Chemistry.mirror source/demo/Chemistry.java
+
+===  4.  Compile & run unmodified code [RECORDING MODE]  ===
+
+... Same output as before, with > prefixing recorded lines
++ javac -source 1.8 -d target/classes -cp source source/demo/Chemistry.java
++ java -ea -cp target/classes demo.Chemistry
+> Atom.construct atom#1 "hydrogen" 1 0 1
+> Atom.construct atom#2 "oxygen" 8 8 8
+> Atom.representation atom#1 => "<Atom hydrogen; protons 1, neutrons 0, electrons 1>"
+Chemistry.main@23: created: <Atom hydrogen; protons 1, neutrons 0, electrons 1>
+> Atom.representation atom#2 => "<Atom oxygen; protons 8, neutrons 8, electrons 8>"
+Chemistry.main@24: created: <Atom oxygen; protons 8, neutrons 8, electrons 8>
+> Molecule.construct molecule#1 "dioxygen" atom#2 atom#2 null
+> Molecule.construct molecule#2 "water" atom#2 atom#1 atom#1
+> Molecule.representation molecule#1 => "<Molecule dioxygen: oxygen + oxygen>"
+Chemistry.main@29: created: <Molecule dioxygen: oxygen + oxygen>
+> Molecule.representation molecule#2 => "<Molecule water: oxygen + hydrogen + hydrogen>"
+Chemistry.main@30: created: <Molecule water: oxygen + hydrogen + hydrogen>
+> Molecule.name molecule#1 => "dioxygen"
+Molecule.electrons@48: Calculating number of electrons for <Molecule dioxygen: oxygen + oxygen>
+Molecule.electrons@49:   oxygen has 8 electrons
+Molecule.electrons@50:   oxygen has 8 electrons
+Molecule.electrons@61: Calculated total electrons: 16
+> Molecule.electrons molecule#1 => 16
+Chemistry.main@32: dioxygen has 16 electrons
+> Molecule.name molecule#2 => "water"
+Molecule.electrons@48: Calculating number of electrons for <Molecule water: oxygen + hydrogen + hydrogen>
+Molecule.electrons@49:   oxygen has 8 electrons
+Molecule.electrons@50:   hydrogen has 1 electrons
+Molecule.electrons@58:   hydrogen has 1 electrons
+Molecule.electrons@61: Calculated total electrons: 10
+> Molecule.electrons molecule#2 => 10
+Chemistry.main@33: water has 10 electrons
+
+===  5.  Replay mode ===
+
+... < prefixing replaying lines (traces in demo.Atom & demo.Molecule are MISSING on purpose -- methods not called)
++ cp recording.txt replaying.txt
++ java -ea -cp target/classes demo.Chemistry
+< Atom.representation atom#1 => "<Atom hydrogen; protons 1, neutrons 0, electrons 1>"
+Chemistry.main@23: created: <Atom hydrogen; protons 1, neutrons 0, electrons 1>
+< Atom.representation atom#2 => "<Atom oxygen; protons 8, neutrons 8, electrons 8>"
+Chemistry.main@24: created: <Atom oxygen; protons 8, neutrons 8, electrons 8>
+< Molecule.representation molecule#1 => "<Molecule dioxygen: oxygen + oxygen>"
+Chemistry.main@29: created: <Molecule dioxygen: oxygen + oxygen>
+< Molecule.representation molecule#2 => "<Molecule water: oxygen + hydrogen + hydrogen>"
+Chemistry.main@30: created: <Molecule water: oxygen + hydrogen + hydrogen>
+< Molecule.name molecule#1 => "dioxygen"
+< Molecule.electron molecule#1 => <int 16>
+Chemistry.main@32: dioxygen has 16 electrons
+< Molecule.name molecule#2 => "water"
+< Molecule.electron molecule#2 => <int 10>
+Chemistry.main@33: water has 10 electrons
+
+=== 6.  RESTORE code ===
+
+... RESTORING source/demo/Chemistry.java
++ cp source/demo/Chemistry.mirror source/demo/Chemistry.java
+
+=== 7.  Running Maven -- then internal unit tests ===
+
++ mvn package
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] Building Alpha 1.0-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:resources (default-resources) @ Alpha ---
+[WARNING] Using platform encoding (UTF-8 actually) to copy filtered resources, i.e. build is platform dependent!
+[INFO] skip non existing resourceDirectory /home/joy/Mirror/src/main/resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.7.0:compile (default-compile) @ Alpha ---
+[INFO] Changes detected - recompiling the module!
+[WARNING] File encoding has not been set, using platform encoding UTF-8, i.e. build is platform dependent!
+[INFO] Compiling 92 source files to /home/joy/Mirror/target/classes
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:testResources (default-testResources) @ Alpha ---
+[WARNING] Using platform encoding (UTF-8 actually) to copy filtered resources, i.e. build is platform dependent!
+[INFO] skip non existing resourceDirectory /home/joy/Mirror/src/test/resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.7.0:testCompile (default-testCompile) @ Alpha ---
+[INFO] Changes detected - recompiling the module!
+[WARNING] File encoding has not been set, using platform encoding UTF-8, i.e. build is platform dependent!
+[INFO] Compiling 1 source file to /home/joy/Mirror/target/test-classes
+[INFO] 
+[INFO] --- maven-surefire-plugin:2.12.4:test (default-test) @ Alpha ---
+[INFO] Surefire report directory: /home/joy/Mirror/target/surefire-reports
+
+-------------------------------------------------------
+ T E S T S
+-------------------------------------------------------
+Running crystal.link.JacinthTest
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.018 sec
+
+Results :
+
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+
+[INFO] 
+[INFO] --- maven-jar-plugin:3.1.0:jar (default-jar) @ Alpha ---
+[INFO] Building jar: /home/joy/Mirror/target/Alpha-1.0-SNAPSHOT.jar
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 8.111 s
+[INFO] Finished at: 2019-09-16T07:56:49-04:00
+[INFO] Final Memory: 17M/261M
+[INFO] ------------------------------------------------------------------------
++ java -cp target/Alpha-1.0-SNAPSHOT.jar link.crystal.Alpha.Main
+analysis of "Can't": "Can't"
+UnitTest_Gem.test_arrange@75: created: 7
+hi: { and { yes "\"arrange 7" then }
+UnitTest_Gem.test_string@130: <"seven"> .vs <"eight">: 14
+discarding__World_String_WeakReference(<World_String_WeakReference <"eight">>): phantom<World_String_WeakReference_PhantomReference "eight">
+Dump of World_String_Cache string cache - before
+      size: 3
+  <World_String_EnduringReference <"eight">>
+  <World_String_WeakReference <"nine">>
+  <World_String_WeakReference <"seven">>
+End of dump of World_String_Cache string cache - before
+no garbage collected ... sleeping for 0.007 seconds ...
+=== REAP ===: <World_String_WeakReference_PhantomReference "eight">
+garbage collected: 3 ... sleeping for 0.007 seconds ...
+no garbage collected ... sleeping for 0.007 seconds ...
+no garbage collected ... sleeping for 0.007 seconds ...
+no garbage collected ... sleeping for 0.007 seconds ...
+total garbage collected: 3
+Dump of World_String_Cache string cache - after
+      size: 1
+  <World_String_EnduringReference <"eight">>
+End of dump of World_String_Cache string cache - after

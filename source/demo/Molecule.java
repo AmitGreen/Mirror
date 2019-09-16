@@ -73,13 +73,13 @@ public final class  Molecule
     public final String                 representation()
     {
         if (this.molecule_atom_3 == null) {
-            return arrange("<Molecule {}: {} + {}", 
+            return arrange("<Molecule {}: {} + {}>", 
                            this.molecule_name,
                            this.molecule_atom_1.name(),
                            this.molecule_atom_2.name());
         }
 
-        return arrange("<Molecule {}: {} + {} + {}", 
+        return arrange("<Molecule {}: {} + {} + {}>", 
                        this.molecule_name,
                        this.molecule_atom_1.name(),
                        this.molecule_atom_2.name(),
